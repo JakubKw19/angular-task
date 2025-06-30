@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>Edit row</h2>
+<mat-dialog-content>
+  <form class="example-form">
+    <div>
+    <mat-form-field class="example-full-width">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" [(ngModel)]="data.element.name" />
+    </mat-form-field>
+    <mat-form-field class="example-full-width">
+        <mat-label>Weight</mat-label>
+        <input matInput name="weight" [(ngModel)]="data.element.weight" />
+    </mat-form-field>
+    <mat-form-field class="example-full-width">
+        <mat-label>Symbol</mat-label>
+        <input matInput name="symbol" [(ngModel)]="data.element.symbol" />
+    </mat-form-field>
+    </div>
+    <div class="customSaveButtonConstainer">
+    <button mat-raised-button color="primary" (click)="save(data.element)">Save</button>
+    </div>
+</form>
+</mat-dialog-content>
