@@ -20,12 +20,16 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [MatDialogTitle, MatDialogContent, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
 })
 export class DialogDataExampleDialog {
-  data = inject(MAT_DIALOG_DATA);
+  data: { element: PeriodicElement, editRow: (row: PeriodicElement) => void } = inject(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef<DialogDataExampleDialog>);
-  expression: any;
-  save(savedData: PeriodicElement): void {
-    console.log('Saved data:', savedData);
-    this.data.editRow(savedData);
+  editedElement: PeriodicElement;
+
+  constructor() {
+    this.editedElement = { ...this.data.element };
+  }
+
+  save(): void {
+    this.data.editRow(this.editedElement);
     this.dialogRef.close();
   }
 }

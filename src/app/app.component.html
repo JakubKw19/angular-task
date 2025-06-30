@@ -6,10 +6,10 @@
     <mat-card-content>
       <mat-form-field class="example-full-width">
         <mat-label>Filter</mat-label>
-        <input matInput (keyup)="applyFilter(filterValue)" placeholder="Put any filter value" [(ngModel)]="filterValue" />
+        <input matInput (keyup)="onFilterChange($any($event.target).value)" placeholder="Put any filter value" [value]="filterValue()" />
       </mat-form-field>
-    <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
-    <app-table [data]="periodicData" [columnNames]="columnNames" [editRow]="editRow.bind(this)"></app-table>
+    <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
+    <app-table [data]="filteredData()" [columnNames]="columnNames" [editRow]="editRow"></app-table>
     </mat-card-content>
   </mat-card>
 </main>

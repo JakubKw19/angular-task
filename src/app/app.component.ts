@@ -1,14 +1,13 @@
-import { Component } from '@angular/core';
-import { PeriodicElement } from '../types/PeriodicElement';
-import { TableComponent } from './table/table.component';
+import { Component, effect, inject, signal } from '@angular/core';
+import { ElementStore } from './elementStore.store';
+import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { CommonModule } from '@angular/common';
-import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
-import { DataService } from './data.service';
+import { TableComponent } from './table/table.component';
+import { PeriodicElement } from '../types/PeriodicElement';
 
 @Component({
   selector: 'app-root',
@@ -17,58 +16,32 @@ import { DataService } from './data.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-
 export class AppComponent {
-  title = 'my-app';
-  periodicData = [] as PeriodicElement[];
-  filterValue = '';
-  columnNames = ['Number', 'Name', 'Weight', 'Symbol'];
-  isLoading = false;
-  isLoadingTable = true;
-  private filterSubject = new Subject<string>();
-  private subscriptions = new Subscription();
+  private store = inject(ElementStore);
 
-  constructor(private dataService: DataService) { }
+  filterValue = signal('');
+  private filterTimeout?: any;
 
-  ngOnInit(): void {
-    console.log('AppComponent initialized');
-    this.isLoadingTable = true;
-    this.dataService.getPeriodicElements().subscribe(data => {
-      this.periodicData = data;
-      this.isLoadingTable = false;
-    });
+  filteredData = this.store.filteredElements;
+  isLoading = this.store.isLoading;
 
-    this.subscriptions.add(this.filterSubject.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(debouncedFilterValue => {
-      this.performFilter(debouncedFilterValue);
-    }));
+  columnNames = ['position', 'name', 'weight', 'symbol'];
+
+  ngOnInit() {
+    this.store.loadElements();
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+  onFilterChange(value: string) {
+    this.filterValue.set(value);
+    clearTimeout(this.filterTimeout);
+    this.isLoading.set(true);
+    this.filterTimeout = setTimeout(() => {
+      this.store.setFilter(this.filterValue());
+      this.isLoading.set(false);
+    }, 2000);
   }
 
-  editRow(row: PeriodicElement) {
-    this.periodicData = this.periodicData.map(element => {
-      if (element.position === row.position) {
-        return row;
-      } else {
-        return element;
-      }
-    });
-    console.log(this.periodicData)
-  }
-  applyFilter(filterValue: string) {
-    this.filterSubject.next(filterValue);
-  }
-
-  private performFilter(filterValue: string): void {
-    this.isLoading = true;
-    this.dataService.filterPeriodicElements(filterValue).subscribe(filteredData => {
-      this.periodicData = filteredData;
-      this.isLoading = false;
-    });
-  }
+  editRow = (row: PeriodicElement) => {
+    this.store.updateElement(row);
+  };
 }
